@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Voting App</title>
+</head>
+<body>
+<h1>Voting System</h1>
+
+<form action="/vote" method="post">
+    <label>Voter ID:</label>
+    <input name="voter_id" required><br><br>
+
+    <label>Choose option:</label><br>
+    {% for o in options %}
+        <input type="radio" name="option_id" value="{{ o.id }}" required>
+        {{ o.option_text }} ({{ o.votes }})<br>
+    {% endfor %}
+
+    <br>
+    <button type="submit">Vote</button>
+</form>
+
+<hr>
+<a href="/results">View results (JSON)</a>
+
+</body>
+</html>
