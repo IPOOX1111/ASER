@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: voting-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app1
+      - app2
+    networks:
+      - appnet
+
+  app1:
+    build: ./app
+    container_name: voting-app1
+    environment:
+      DB_HOSTS: "db-master,db-replica"
+      DB_USER: root
+      DB_PASSWORD: rootpass
+      DB_NAME: voting_db
+      SERVER_NAME: APP-1
+    networks:
+      - appnet
+    depends_on:
+      - db-master
+      - db-replica
+
+  app2:
+    build: ./app
+    container_name: voting-app2
+    environment:
+      DB_HOSTS: "db-master,db-replica"
+      DB_USER: root
+      DB_PASSWORD: rootpass
+      DB_NAME: voting_db
+      SERVER_NAME: APP-2
+    networks:
+      - appnet
+    depends_on:
+      - db-master
+      - db-replica
+
+  db-master:
+    image: mysql:8.0
+    container_name: voting-db-master
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: voting_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - appnet
+
+  db-replica:
+    image: mysql:8.0
+    container_name: voting-db-replica
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: voting_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - appnet
+
+networks:
+  appnet:
+
+volumes:
+  mysql-data:
